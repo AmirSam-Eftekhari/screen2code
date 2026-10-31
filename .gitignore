@@ -1,0 +1,12 @@
+__pycache__/
+*.egg-info/
+.venv/
+node_modules/
+benchmarks/results/
+.s2c-cache/
+*.pyc
+dist/
+build/
+ui/node_modules/
+src-tauri/target/
+src-tauri/gen/

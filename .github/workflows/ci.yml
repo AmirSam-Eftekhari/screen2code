@@ -1,0 +1,26 @@
+# NOTE: written but not executed in the authoring environment. Expect to adjust runner-specific details (fonts, Tesseract install, sandbox).
+name: ci
+on: [push, pull_request]
+jobs:
+  full-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update && sudo apt-get install -y tesseract-ocr fonts-liberation
+      - run: pip install -e . && python -m playwright install --with-deps chromium
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm install --prefix ui && npm run --prefix ui typecheck && python scripts/build_ui.py
+      - run: python -m screen2code.ir.schema | diff - schema/ir-0.1.schema.json
+      - run: python -m unittest discover -s tests -t . -v
+      - run: screen2code --allow-no-sandbox benchmark --tier smoke --seed 1 --repeat-check --out benchmarks/results
+  platform-independent-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e .
+      - run: python -m unittest tests.test_ir tests.test_core -v

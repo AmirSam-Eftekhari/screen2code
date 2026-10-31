@@ -1,0 +1,15 @@
+# Builds a wheel on version tags and attaches it as a workflow artifact. It does not publish, sign, or create an installer.
+name: release
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip wheel . --no-deps -w dist
+      - uses: actions/upload-artifact@v4
+        with: { name: wheel, path: dist/*.whl }
