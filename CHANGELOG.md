@@ -1,9 +1,7 @@
 # Changelog
 
-## 0.1.0.dev0 (release candidate, scope frozen)
+## 0.1.0 — public source preview (unreleased tag)
 
-Versioned IR (schema, validator, canonical form); screenshot reconstruction with tokens and shared components; one page shown at several widths unified with responsive patches (explicit fallback with
-recorded reasons); HTML/CSS and React generation; Tier-0 rendering (JS off, offline, fail-closed sandbox); visual evaluation; measured refinement loop; text redaction (`--redact-text`); synthetic benchmark;
-CLI; Python API; JSON-RPC sidecar with validated, project-confined methods; desktop UI web bundle tested against the real sidecar.
+This source preview includes the Python engine, versioned IR and validator, screenshot reconstruction, responsive multi-screen reconciliation, HTML/CSS generation, experimental generate-only React output, Tier-0 rendering, visual evaluation, measured refinement, text-only redaction, CLI, Python API, JSON-RPC sidecar, React/TypeScript web UI, and a Tauri shell verified in Windows development mode by the maintainer.
 
-Not implemented: Next.js target, pre-perception pixel masking, navigation inference. Built but never compiled/verified: the Tauri shell. See RELEASE_NOTES.md and docs/STATUS.md.
+The preview does not include a packaged desktop installer, signed sidecar, auto-updater, macOS package, Next.js target, navigation inference, learned detector/VLM pipeline, pre-perception pixel masking, or generated-project execution. See [RELEASE_NOTES.md](RELEASE_NOTES.md) and [docs/STATUS.md](docs/STATUS.md).

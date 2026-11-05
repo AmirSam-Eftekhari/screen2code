@@ -1,4 +1,3 @@
-# UNVERIFIED: this scaffold has not been compiled (no Rust toolchain was available when it was written).
 [package]
 name = "screen2code-desktop"
 version = "0.1.0"

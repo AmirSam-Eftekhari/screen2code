@@ -2,8 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please do **not** open a public issue for a vulnerability. Use the repository's private vulnerability reporting (GitHub "Report a vulnerability"). *Maintainers: enable
-private vulnerability reporting and name a response owner before publishing this repository; no contact address is configured in this source tree.*
+Please do **not** open a public issue for a vulnerability. Use the repository's private vulnerability reporting (GitHub **Security → Advisories → Report a vulnerability**). **Before making the repository public, the maintainer must enable private vulnerability reporting in GitHub repository settings and ensure that at least one maintainer monitors incoming reports.** No security contact address is configured in this source tree; do not publish until the private reporting channel is enabled.
 
 ## Scope and model
 

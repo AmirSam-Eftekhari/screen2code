@@ -10,3 +10,9 @@ build/
 ui/node_modules/
 src-tauri/target/
 src-tauri/gen/
+ui/dist/
+*.s2c/
+*.log
+*.tmp
+playwright-report/
+test-results/

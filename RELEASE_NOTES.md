@@ -1,31 +1,31 @@
-# Screen2Code 0.1 release candidate: release notes
+# Screen2Code 0.1 — public source preview
 
-Scope is frozen. This candidate is a working Python engine, CLI, JSON-RPC sidecar, and a desktop UI web bundle. It is **not** a verified desktop application release.
+This is an early public-source preview of the Screen2Code engine and desktop UI code. It is not a stable binary desktop release.
 
-## What works (verified by the automated tests in this repository)
+## Included
 
-- Screenshot to IR to HTML/CSS (and generate-only React), rendered in locked-down Chromium and measured against the reference (SSIM, edge F1, layout IoU, composite) with overlay and difference images.
-- Several screenshots of one page at different widths become one page with responsive patches and one `@media` rule; when screens cannot be matched they stay separate and the reasons are recorded.
-- Design tokens and shared components across pages, with near misses (similar but not merged) reported, not hidden.
-- Measured refinement loop (`screen2code refine`), never applied to the IR unless asked.
-- Text redaction (`--redact-text`, UI Settings): recognized text is removed from the IR, evidence, names and exports; records are auditable; evaluation counts redacted regions as an exclusion.
-- JSON-RPC sidecar (`screen2code serve`) and a React UI that talks to it; the UI test drives the built bundle in Chromium against a real sidecar process.
+- Python engine, CLI and Python API.
+- Versioned interface representation (IR), schema, validator and migration support.
+- Screenshot import, classical computer-vision segmentation, Tesseract OCR and evidence-linked measurement.
+- HTML/CSS generation and experimental generate-only React output.
+- Multi-screen responsive reconciliation with explicit fallback when evidence is insufficient.
+- Tier-0 static rendering (JavaScript disabled, network blocked) and visual evaluation.
+- Bounded, measured refinement; explicit `--apply` required to modify committed IR.
+- Text-only redaction; source pixels and raster assets are retained.
+- JSON-RPC sidecar and React/TypeScript web UI.
+- Tauri desktop shell that has been compiled and launched in Windows development mode by the maintainer.
 
-## Security posture
+## Not included / not promised
 
-Screenshots, the IR and generated code are untrusted. Generated code is never built or executed by Screen2Code. Rendering is offline with JavaScript disabled, and **fails closed** when Chromium's sandbox cannot start;
-the explicit opt-in (`--allow-no-sandbox`, or the Settings checkbox) is recorded on every render and shown in the UI. The sidecar validates parameters, confines reads and exports to the project, and scrubs secrets from settings and errors.
-Redaction covers recognized text only. **The screenshot and extracted raster assets remain on disk; a redacted project is not safe to share by that alone.**
+- No Windows installer, signed executable, packaged sidecar, auto-updater or macOS application.
+- No automatic build or execution of generated React/Next.js projects.
+- No Next.js target, navigation inference, learned detector/VLM pipeline or pre-perception pixel masking.
+- No production guarantee for arbitrary websites; the committed benchmark is synthetic and small.
 
-## Verification results (Linux, Python 3.12.3, Node with esbuild 0.27.7, TypeScript 6.0.3)
+## Security and privacy
 
-See the final delivery message and `docs/STATUS.md`. The suite: `python -W error::ResourceWarning -m unittest discover -s tests -t .`.
+Screen2Code treats screenshots, IR data, provider output and generated code as untrusted. It validates imports and IR, confines project writes, renders static HTML with JavaScript disabled and network blocked, and does not execute generated projects. Text redaction does not erase text visible in source screenshots or raster assets. Read [docs/SECURITY.md](docs/SECURITY.md) before handling sensitive material.
 
-## Known limitations and external platform gaps
+## Verification
 
-- Windows and Tauri: the shell in `src-tauri/` has never been compiled (no Rust toolchain was available); no icons, no `Cargo.lock`, no installer, no signed sidecar. Windows is unverified for the whole project. Steps: docs/INSTALL.md.
-- The UI is type-checked against a hand-written subset of React's types (offline). With network, `npm install --prefix ui` provides the real `@types/react`; this was not run.
-- CI workflows were never executed.
-- Header/footer shared across responsive pages are not componentized (reported as skipped); one fixture page (Contact) scores low (composite 0.60).
-- Benchmarks are synthetic (8 scenes) and do not predict real-world quality. Sandbox-less rendering was used in this environment for every measured render.
-- Not implemented: Next.js, pixel masking, navigation inference, learned detectors, remote providers.
+The exact checks performed on the supplied archive are recorded in [docs/STATUS.md](docs/STATUS.md). The independent review passed 57 core/IR tests; full-suite execution did not complete in the review environment, and Chromium-dependent tests could not run there. The maintainer separately verified the Tauri development shell on Windows. Do not interpret these results as a full release qualification.

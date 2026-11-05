@@ -1,5 +1,7 @@
 > Maintainer notes from development. The release state is in RELEASE_NOTES.md and docs/STATUS.md; test counts below are historical.
 
+> **Historical engineering handoff (October 2026).** This is a point-in-time development log and contains outdated test counts and task statuses. Do not use it as the current release-status document. Use [STATUS.md](STATUS.md) for current verified state.
+
 # HANDOFF: state of Screen2Code for the next engineer (or the next Claude session)
 
 Written at the end of a long session. Everything below was checked against the repository, not remembered. Authoritative companions: `docs/STATUS.md` (what exists),

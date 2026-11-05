@@ -1,75 +1,72 @@
 # Installation
 
-Screen2Code runs locally; nothing is uploaded and no model is downloaded automatically.
+Screen2Code runs locally. It does not automatically upload screenshots or download model weights.
 
 ## Requirements
 
-| Need | Why | Check |
+| Requirement | Purpose | Check |
 |---|---|---|
-| Python 3.11+ | engine | `python --version` |
-| Tesseract 5 with English data (`eng`) | default OCR provider | `tesseract --version` |
-| Chromium via Playwright | Tier-0 rendering | `python -m playwright install chromium` |
-| A sans-serif font set (Liberation Sans recommended) | rendering reference fonts | `screen2code doctor` lists the files used |
+| Python 3.11+ | Engine and CLI | `python --version` |
+| Tesseract 5 with English data (`eng`) | Default OCR provider | `tesseract --version` |
+| Chromium installed by Playwright | Tier-0 rendering | `python -m playwright install chromium` |
+| Sans-serif fonts | Reference and generated rendering | `screen2code doctor` |
 
-Tesseract: Linux `apt install tesseract-ocr`; macOS `brew install tesseract`; Windows: install a Tesseract 5 build (for example the UB-Mannheim installer) and put it on `PATH`.
-The Windows steps are documented but have not been verified.
+Install Tesseract separately: Linux `apt install tesseract-ocr`; macOS `brew install tesseract`; Windows use a maintained Tesseract 5 distribution and add its executable to `PATH`.
 
 ## Install from source
 
 ```bash
 python -m venv .venv
-. .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install -e .
+# Linux/macOS
+. .venv/bin/activate
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+python -m pip install -r requirements-lock.txt
+python -m pip install -e . --no-deps
 python -m playwright install chromium
 screen2code doctor
 ```
 
-`pip install .` builds a wheel (verified: all subpackages included; the installed CLI runs in a clean environment).
-A Windows installer, PyInstaller sidecar, and code signing are **not** built (needs a Windows machine and a signing certificate).
+`pip install -e . --no-deps` is paired with `requirements-lock.txt` so the tested dependency versions are used. For a normal editable install with resolver-selected compatible versions, use `python -m pip install -e .` instead.
 
-## Desktop app (Windows, Tauri)
+## Desktop UI and Tauri shell
 
-**Status: the web UI is built and tested; the Tauri shell has never been compiled.** Nothing below has been run on Windows. A signed installer and a packaged sidecar do not exist.
+The React/TypeScript UI is a web bundle. It talks to the local `screen2code serve` JSON-RPC sidecar.
 
-Prerequisites: Rust (rustup, MSVC toolchain with "Desktop development with C++"), Microsoft WebView2 runtime, Node 20+, Python 3.11+, Tesseract 5, Chromium via Playwright.
-
-```powershell
-# 1. engine (inside a venv, as above)
-pip install -r requirements-lock.txt; pip install -e . --no-deps; python -m playwright install chromium; screen2code doctor
-# 2. UI bundle
-npm install --prefix ui; npm run --prefix ui typecheck; python scripts\build_ui.py
-# 3. shell: tauri-build on Windows requires icons; generate them from any square PNG, then build
-cargo install tauri-cli --version "^2" --locked
-cd src-tauri; cargo tauri icon path\to\square.png
-cargo tauri dev        # starts `python -m screen2code.server.main` from PATH (activate the venv first)
-cargo tauri build      # bundle.active is false: produces the executable, not an installer
+```bash
+npm install --prefix ui
+npm run --prefix ui typecheck
+python scripts/build_ui.py
+python -m unittest tests.test_ui
 ```
 
-Expected first-compile work (not yet done): commit the generated `Cargo.lock`; fix any compile error in `src-tauri/src/main.rs`. The shell exposes only `s2c_send`/`s2c_poll` to the web view. A packaged build must set
-`S2C_SIDECAR` to a sidecar executable that accepts the argument `serve`; building and signing that executable is not done.
+The Tauri 2 shell in `src-tauri/` has been compiled and launched in development mode on the maintainer's Windows machine (`cargo check`, `cargo build`, and `cargo run` succeeded there). This does **not** mean a distributable app is ready.
 
-## The browser sandbox
+Current desktop limitations:
 
-`doctor` reports whether Chromium's own sandbox can start. When it cannot (root in a container is the usual cause) `render`/`run` fail closed with `S2C-RENDER-002`.
-Opt in explicitly if you accept that: `screen2code --allow-no-sandbox run ...` or
+- no signed or packaged sidecar executable;
+- no Windows installer or auto-updater;
+- no code signing;
+- no verified clean-machine installation procedure;
+- no macOS package;
+- no automated packaged-app end-to-end suite.
 
-```toml
-# project.toml
-[render]
-allow_no_sandbox = true
-```
+In development mode, the shell starts `python -m screen2code.server.main` from the environment available to the Tauri process. Activate the Python virtual environment before launching it. A packaged build must supply `S2C_SIDECAR` pointing to a sidecar executable that accepts the `serve` argument; that packaging path is not implemented here.
 
-JavaScript stays disabled, the network is blocked, and file access is limited to the project directory regardless. The render record documents the choice.
+## Browser sandbox
+
+`screen2code doctor` reports whether Chromium's sandbox can start. Rendering fails closed if it cannot. You may explicitly opt in with `screen2code --allow-no-sandbox run ...` or the corresponding project setting, but the waiver is recorded. JavaScript stays disabled and network requests are blocked either way.
 
 ## Models
 
-No model weights are bundled. OCR uses the Tesseract binary. The model store (`screen2code models list|install|verify|remove`) installs from a local file after verifying
-the manifest SHA-256 and gating on licence class; non-permissive licences require `--accept-license`. Models live in the per-user data directory
-(override with `SCREEN2CODE_MODELS`). No provider currently consumes installed models.
+No model weights are bundled and no remote model provider is currently used by the core pipeline. OCR uses Tesseract. The model store can validate locally supplied model manifests and checksums, but installed model weights are not currently consumed by a provider.
 
 ## Tests
 
 ```bash
-python -m unittest discover -s tests -t .       # 165 tests (UI tests need node + esbuild; they skip with an explicit reason otherwise)
-python -m unittest tests.test_ir tests.test_core  # fast, platform-independent subset
+python -m unittest discover -s tests -t .
+python -m unittest tests.test_ir tests.test_core
 ```
+
+Tests that require Chromium, OCR, or Node/React tooling may skip when those prerequisites are absent; each skip should state its reason. A skipped test is not a pass. The supplied source snapshot contains 165 test methods. The maintainer's Windows test history and the independent review environment are described separately in [STATUS.md](STATUS.md).
